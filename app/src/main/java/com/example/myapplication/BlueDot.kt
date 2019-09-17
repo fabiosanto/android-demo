@@ -41,20 +41,40 @@ class BlueDot(context: Context, attr: AttributeSet) : View(context, attr) {
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
-            MotionEvent.ACTION_MOVE -> moveDot(event)
-            MotionEvent.ACTION_DOWN -> animateDot()
+            MotionEvent.ACTION_MOVE -> expandRadius(event)
+            MotionEvent.ACTION_DOWN -> animateDot(event)
         }
         return true
     }
 
+    private var dX: Float = 0f
+    private var dY: Float = 0f
+
     private fun moveDot(event: MotionEvent) {
         Log.i("moveDot", "value is ${event.rawX} ${event.rawY}")
-        x = event.rawX
-        y = event.rawY
+
+        x = event.rawX + dX
+        y = event.rawY + dY
         invalidate()
     }
 
-    private fun animateDot() {
+    private fun expandRadius(event: MotionEvent) {
+        val greaterValue = if (event.rawX > event.rawY) event.rawX else event.rawY
+
+        val radiusY = event.y - (height / 2)
+        val radiusX = event.x - (width / 2)
+
+        circleRadius = if (event.y > event.x) radiusY else radiusX
+        invalidate()
+
+        Log.i("greaterValue", "$greaterValue")
+    }
+
+
+    private fun animateDot(event: MotionEvent) {
+        dX = x - event.rawX
+        dY = y - event.rawY
+
         val toRadius = if (circleRadius == radiusMin) radiusMax else radiusMin
 
         ValueAnimator.ofFloat(circleRadius, toRadius).apply {
